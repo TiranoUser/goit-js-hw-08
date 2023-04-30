@@ -38,3 +38,5 @@ form.addEventListener('submit', event => {
   email.value = '';
   message.value = '';
 });
+
+// все работает
