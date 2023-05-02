@@ -2,26 +2,31 @@ import throttle from 'lodash/throttle';
 
 const form = document.querySelector('.feedback-form');
 
-if (localStorage.getItem('feedback-form-state') !== null) {
-  const emailEl = form.elements['email'];
-  emailEl.value = JSON.parse(localStorage.getItem('feedback-form-state')).email;
-  const messageEl = form.elements['message'];
-  messageEl.value = JSON.parse(
-    localStorage.getItem('feedback-form-state')
-  ).message;
+let mylocalObj = {};
+
+function outputMessage() {
+  try {
+    const saveMessage = localStorage.getItem('feedback-form-state');
+    if (!saveMessage) {
+      return;
+    }
+
+    mylocalObj = JSON.parse(saveMessage);
+
+    Object.entries(mylocalObj).forEach(([key, value]) => {
+      form.elements[key].value = value;
+    });
+  } catch (error) {
+    console.log(error);
+  }
 }
+
+outputMessage();
 
 form.addEventListener(
   'input',
-  throttle(event => {
-    event.preventDefault();
-    const {
-      elements: { email, message },
-    } = event.currentTarget;
-    const mylocalObj = {
-      email: email.value,
-      message: message.value,
-    };
+  throttle(e => {
+    mylocalObj[e.target.name] = e.target.value;
     localStorage.setItem('feedback-form-state', JSON.stringify(mylocalObj));
   }),
   500
@@ -29,14 +34,9 @@ form.addEventListener(
 
 form.addEventListener('submit', event => {
   event.preventDefault();
-  const {
-    elements: { email, message },
-  } = event.currentTarget;
 
-  console.log(`email: ${email.value} message: ${message.value}`);
-  localStorage.clear();
-  email.value = '';
-  message.value = '';
+  console.log(mylocalObj);
+  mylocalObj = {};
+  localStorage.removeItem('feedback-form-state');
+  form.reset();
 });
-
-// все работает
